@@ -18,17 +18,18 @@
  FOR A PARTICULAR PURPOSE.  See the license for more details.
 */
 
-#include <ql/indexes/ibor/euribor.hpp>
+#include <ql/indexes/ibor/eurlibor.hpp>
+#include <ql/time/calendars/jointcalendar.hpp>
 #include <ql/time/calendars/target.hpp>
+#include <ql/time/calendars/unitedkingdom.hpp>
 #include <ql/time/daycounters/actual360.hpp>
-#include <ql/time/daycounters/actual365fixed.hpp>
 #include <ql/currencies/europe.hpp>
 
 namespace QuantLib {
 
     namespace {
 
-        BusinessDayConvention euriborConvention(const Period& p) {
+        BusinessDayConvention eurliborConvention(const Period& p) {
             switch (p.units()) {
               case Days:
               case Weeks:
@@ -41,7 +42,7 @@ namespace QuantLib {
             }
         }
 
-        bool euriborEOM(const Period& p) {
+        bool eurliborEOM(const Period& p) {
             switch (p.units()) {
               case Days:
               case Weeks:
@@ -56,28 +57,54 @@ namespace QuantLib {
 
     }
 
-    Euribor::Euribor(const Period& tenor,
-                     const Handle<YieldTermStructure>& h)
-    : IborIndex("Euribor", tenor,
-                2, // settlement days
-                EURCurrency(), TARGET(),
-                euriborConvention(tenor), euriborEOM(tenor),
-                Actual360(), h) {
+    EURLibor::EURLibor(const Period& tenor,
+                       const Handle<YieldTermStructure>& h)
+    : IborIndex("EURLibor", tenor,
+                2,
+                EURCurrency(),
+                // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
+                // JoinBusinessDays is the fixing calendar for
+                // all indexes but o/n
+                JointCalendar(UnitedKingdom(UnitedKingdom::Exchange),
+                              TARGET(),
+                              JoinBusinessDays),
+                eurliborConvention(tenor), eurliborEOM(tenor),
+                Actual360(), h),
+      target_(TARGET()) {
         QL_REQUIRE(this->tenor().units()!=Days,
                    "for daily tenors (" << this->tenor() <<
                    ") dedicated DailyTenor constructor must be used");
     }
 
-    Euribor365::Euribor365(const Period& tenor,
-                           const Handle<YieldTermStructure>& h)
-    : IborIndex("Euribor365", tenor,
-                2, // settlement days
-                EURCurrency(), TARGET(),
-                euriborConvention(tenor), euriborEOM(tenor),
-                Actual365Fixed(), h) {
-        QL_REQUIRE(this->tenor().units()!=Days,
-                   "for daily tenors (" << this->tenor() <<
-                   ") dedicated DailyTenor constructor must be used");
+    Date EURLibor::valueDate(const Date& fixingDate) const {
+
+        QL_REQUIRE(isValidFixingDate(fixingDate),
+                   "Fixing date " << fixingDate << " is not valid");
+
+        // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
+        // In the case of EUR the Value Date shall be two TARGET
+        // business days after the Fixing Date.
+        return target_.advance(fixingDate, fixingDays_, Days);
     }
+
+    Date EURLibor::maturityDate(const Date& valueDate) const {
+        // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
+        // In the case of EUR only, maturity dates will be based on days in
+        // which the Target system is open.
+        return target_.advance(valueDate, tenor_, convention_, endOfMonth());
+    }
+
+    DailyTenorEURLibor::DailyTenorEURLibor(Natural settlementDays,
+                                           const Handle<YieldTermStructure>& h)
+    : IborIndex("EURLibor", 1*Days,
+                settlementDays,
+                EURCurrency(),
+                // http://www.bba.org.uk/bba/jsp/polopoly.jsp?d=225&a=1412 :
+                // no o/n or s/n fixings (as the case may be) will take place
+                // when the principal centre of the currency concerned is
+                // closed but London is open on the fixing day.
+                TARGET(),
+                eurliborConvention(1*Days), eurliborEOM(1*Days),
+                Actual360(), h) {}
 
 }

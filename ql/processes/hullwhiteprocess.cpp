@@ -34,7 +34,10 @@ namespace QuantLib {
     Real HullWhiteProcess::x0() const {
         return process_->x0();
     }
-
+	//added by jihoon
+	void HullWhiteProcess::setX0(Real x0) {
+		process_->setX0(x0);
+	}
     Real HullWhiteProcess::drift(Time t, Real x) const {
         Real alpha_drift = sigma_*sigma_/(2*a_)*(1-std::exp(-2*a_*t));
         Real shift = 0.0001;

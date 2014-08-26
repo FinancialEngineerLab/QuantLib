@@ -30,6 +30,9 @@
 #define quantlib_euribor_hpp
 
 #include <ql/indexes/iborindex.hpp>
+#include <ql/currencies/asia.hpp>
+#include <ql/time/calendars/southkorea.hpp>
+#include <ql/time/daycounters/actual365fixed.hpp>
 
 namespace QuantLib {
 
@@ -42,6 +45,20 @@ namespace QuantLib {
     class Euribor : public IborIndex {
       public:
         Euribor(const Period& tenor,
+                const Handle<YieldTermStructure>& h =
+                                    Handle<YieldTermStructure>());
+    };
+	  
+	class KRWibor : public IborIndex {
+      public:
+        KRWibor(const Period& tenor,
+                const Handle<YieldTermStructure>& h =
+                                    Handle<YieldTermStructure>());
+    };
+	  
+	class KRWiborFX : public IborIndex {
+      public:
+        KRWiborFX(const Period& tenor,
                 const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>());
     };
@@ -104,6 +121,20 @@ namespace QuantLib {
         Euribor3M(const Handle<YieldTermStructure>& h =
                                     Handle<YieldTermStructure>())
         : Euribor(Period(3, Months), h) {}
+    };
+	    
+	class KRWibor3M : public KRWibor {
+      public:
+        KRWibor3M(const Handle<YieldTermStructure>& h =
+                                    Handle<YieldTermStructure>())
+        : KRWibor(Period(3, Months), h) {}
+    };
+	    
+	class KRWiborFX6M : public KRWiborFX {
+      public:
+        KRWiborFX6M(const Handle<YieldTermStructure>& h =
+                                    Handle<YieldTermStructure>())
+        : KRWiborFX(Period(6, Months), h) {}
     };
 
     //! 4-months %Euribor index
@@ -299,6 +330,7 @@ namespace QuantLib {
         : Euribor365(Period(1, Years), h) {}
     };
 
+	 
 }
 
 #endif

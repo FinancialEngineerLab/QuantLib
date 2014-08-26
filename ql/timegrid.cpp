@@ -39,7 +39,20 @@ namespace QuantLib {
 
         dt_ = std::vector<Time>(steps,dt);
     }
+	//added by jihoon lee, 20140826
+	TimeGrid::TimeGrid(Time end, Size steps, Time startTime){
+		QL_REQUIRE(end > 0.0,
+                   "negative times not allowed");
+        Time dt = end/steps;
+        times_.reserve(steps+1);
+        for (Size i=0; i<=steps; i++)
+            times_.push_back(dt*i + startTime);
 
+        mandatoryTimes_ = std::vector<Time>(1);
+        mandatoryTimes_[0] = end;
+
+        dt_ = std::vector<Time>(steps,dt);
+	}
     Size TimeGrid::index(Time t) const {
         Size i = closestIndex(t);
         if (close_enough(t,times_[i])) {
