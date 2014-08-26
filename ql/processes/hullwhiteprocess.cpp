@@ -34,7 +34,7 @@ namespace QuantLib {
     Real HullWhiteProcess::x0() const {
         return process_->x0();
     }
-	//added by jihoon
+	//added by Jihoon lee 20140826
 	void HullWhiteProcess::setX0(Real x0) {
 		process_->setX0(x0);
 	}

@@ -64,7 +64,7 @@ namespace QuantLib {
         Real variance(Time t0,
                       Real x0,
                       Time dt) const;
-		//added by jihoon lee
+		//added by Jihoon lee 20140826
 		void setX0(Real x0){ x0_ = x0; };
       private:
         Real x0_, speed_, level_;

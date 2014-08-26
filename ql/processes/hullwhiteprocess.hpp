@@ -49,6 +49,8 @@ namespace QuantLib {
         Real a() const;
         Real sigma() const;
         Real alpha(Time t) const;
+		//added by Jihoon Lee 20140826
+		void setX0(Real x0);
         //@}
     protected:
         boost::shared_ptr<QuantLib::OrnsteinUhlenbeckProcess> process_;

@@ -48,7 +48,7 @@ namespace QuantLib {
         /*! Mandatory points are guaranteed to belong to the grid.
             No additional points are added.
         */
-		//added by jihoon lee, 20140826
+		//added by Jihoon lee, 20140826
 		TimeGrid(Time end, Size steps, Time startTime);
         template <class Iterator>
         TimeGrid(Iterator begin, Iterator end)
