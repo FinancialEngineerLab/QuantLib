@@ -27,6 +27,7 @@
 #include <ql/processes/forwardmeasureprocess.hpp>
 #include <ql/processes/ornsteinuhlenbeckprocess.hpp>
 #include <ql/termstructures/yieldtermstructure.hpp>
+#include <ql/termstructures/volatility/hullwhitevolatility.hpp>
 
 namespace QuantLib {
 
@@ -37,6 +38,11 @@ namespace QuantLib {
         HullWhiteProcess(const Handle<YieldTermStructure>& h,
                          Real a,
                          Real sigma);
+		//added by jihoon lee
+		HullWhiteProcess(const Handle<YieldTermStructure>& h,
+						 Real a,
+						 HullWhiteVolatility volTermStructure);
+
         //! \name StochasticProcess1D interface
         //@{
         Real x0() const;
@@ -52,10 +58,14 @@ namespace QuantLib {
 		//added by Jihoon Lee 20140826
 		void setX0(Real x0);
         //@}
-    protected:
+      protected:
         boost::shared_ptr<QuantLib::OrnsteinUhlenbeckProcess> process_;
         Handle<YieldTermStructure> h_;
         Real a_, sigma_;
+	  private:		
+		HullWhiteVolatility volTermStructures_;
+		boost::function<Real (Time)> vol_;
+		bool useTermStructure_;
     };
 
     //! %Forward Hull-White stochastic process

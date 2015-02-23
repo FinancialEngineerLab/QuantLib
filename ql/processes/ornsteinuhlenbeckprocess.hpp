@@ -27,6 +27,7 @@
 #define quantlib_ornstein_uhlenbeck_process_hpp
 
 #include <ql/stochasticprocess.hpp>
+#include <ql/termstructures/volatility/hullwhitevolatility.hpp>
 
 namespace QuantLib {
 
@@ -44,6 +45,12 @@ namespace QuantLib {
                                  Volatility vol,
                                  Real x0 = 0.0,
                                  Real level = 0.0);
+		//added by Jihoon Lee 20150127
+		OrnsteinUhlenbeckProcess(Real speed,
+						         HullWhiteVolatility volTermStructure,
+								 Real x0 = 0.0,
+								 Real level = 0.0);
+
         //! \name StochasticProcess interface
         //@{
         Real drift(Time t,
@@ -69,6 +76,9 @@ namespace QuantLib {
       private:
         Real x0_, speed_, level_;
         Volatility volatility_;
+		HullWhiteVolatility volTermStructures_;
+		boost::function<Real (Time)> vol_;
+		bool useTermStructure_;
     };
 
     // inline

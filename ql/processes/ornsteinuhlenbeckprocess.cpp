@@ -27,18 +27,42 @@ namespace QuantLib {
                                                        Volatility vol,
                                                        Real x0,
                                                        Real level)
-    : x0_(x0), speed_(speed), level_(level), volatility_(vol) {
+    : x0_(x0), speed_(speed), level_(level), volatility_(vol), volTermStructures_() {
         QL_REQUIRE(speed_ >= 0.0, "negative speed given");
         QL_REQUIRE(volatility_ >= 0.0, "negative volatility given");
+		useTermStructure_ = false;
     }
 
-    Real OrnsteinUhlenbeckProcess::variance(Time, Real, Time dt) const {
+	//added by jihoon lee
+	OrnsteinUhlenbeckProcess::OrnsteinUhlenbeckProcess(Real speed,
+		HullWhiteVolatility volTermStructure,
+		Real x0,
+		Real level)
+		: x0_(x0), speed_(speed), level_(level), volTermStructures_(volTermStructure) {
+			QL_REQUIRE(speed_ >= 0.0, "negative speed given");	
+			vol_ = volTermStructure.vol();
+			useTermStructure_= true;
+	}
+
+	//modified by jihoon lee, 20150223
+    Real OrnsteinUhlenbeckProcess::variance(Time t, Real, Time dt) const {
         if (speed_ < std::sqrt(QL_EPSILON)) {
              // algebraic limit for small speed
-            return volatility_*volatility_*dt;
+			if (useTermStructure_){
+				Real vol = vol_(t);
+				return vol * vol * dt;
+			} else {
+				return volatility_*volatility_*dt;
+			}            
         } else {
-            return 0.5*volatility_*volatility_/speed_*
-                (1.0 - std::exp(-2.0*speed_*dt));
+			if (useTermStructure_){
+				Real vol = vol_(t);
+				return 0.5*vol*vol/speed_*
+					(1.0 - std::exp(-2.0*speed_*dt));
+			} else {
+				return 0.5*volatility_*volatility_/speed_*
+					(1.0 - std::exp(-2.0*speed_*dt));
+			}            
         }
     }
 

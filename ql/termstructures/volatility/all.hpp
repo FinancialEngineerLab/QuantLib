@@ -16,3 +16,4 @@
 #include <ql/termstructures/volatility/inflation/all.hpp>
 #include <ql/termstructures/volatility/optionlet/all.hpp>
 #include <ql/termstructures/volatility/swaption/all.hpp>
+

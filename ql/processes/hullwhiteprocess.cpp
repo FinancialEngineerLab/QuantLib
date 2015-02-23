@@ -26,10 +26,22 @@ namespace QuantLib {
                                        Real sigma)
     : process_(new OrnsteinUhlenbeckProcess(
                    a, sigma, h->forwardRate(0.0,0.0,Continuous,NoFrequency))),
-      h_(h), a_(a), sigma_(sigma) {
-        QL_REQUIRE(a_ >= 0.0, "negative a given");
-        QL_REQUIRE(sigma_ >= 0.0, "negative sigma given");
+      h_(h), a_(a), sigma_(sigma), volTermStructures_() {
+		  QL_REQUIRE(a_ >= 0.0, "negative a given");
+		  QL_REQUIRE(sigma_ >= 0.0, "negative sigma given");
+		  useTermStructure_ = false;
     }
+	//added by jihoon lee
+	HullWhiteProcess::HullWhiteProcess(const Handle<YieldTermStructure>& h,
+		Real a,
+		HullWhiteVolatility volTermStructure)
+		: process_(new OrnsteinUhlenbeckProcess(
+		a, volTermStructure, h->forwardRate(0.0,0.0,Continuous,NoFrequency))),
+		h_(h), a_(a), sigma_(0), volTermStructures_(volTermStructure) {
+			vol_ = volTermStructure.vol();
+			QL_REQUIRE(a_ >= 0.0, "negative a given");	
+			useTermStructure_ = true;
+	}
 
     Real HullWhiteProcess::x0() const {
         return process_->x0();
@@ -39,7 +51,9 @@ namespace QuantLib {
 		process_->setX0(x0);
 	}
     Real HullWhiteProcess::drift(Time t, Real x) const {
-        Real alpha_drift = sigma_*sigma_/(2*a_)*(1-std::exp(-2*a_*t));
+		Real vol = useTermStructure_ ? vol_(t) : sigma_;
+
+        Real alpha_drift = vol*vol/(2*a_)*(1-std::exp(-2*a_*t));
         Real shift = 0.0001;
         Real f = h_->forwardRate(t, t, Continuous, NoFrequency);
         Real fup = h_->forwardRate(t+shift, t+shift, Continuous, NoFrequency);
@@ -66,9 +80,11 @@ namespace QuantLib {
     }
 
     Real HullWhiteProcess::alpha(Time t) const {
+		Real vol = useTermStructure_ ? vol_(t) : sigma_;
+
         Real alfa = a_ > QL_EPSILON ?
-                    (sigma_/a_)*(1 - std::exp(-a_*t)) :
-                    sigma_*t;
+                    (vol/a_)*(1 - std::exp(-a_*t)) :
+                    vol*t;
         alfa *= 0.5*alfa;
         alfa += h_->forwardRate(t, t, Continuous, NoFrequency);
         return alfa;
