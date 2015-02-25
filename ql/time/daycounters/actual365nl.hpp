@@ -72,6 +72,9 @@ namespace QuantLib {
                                         const Date& d4) const {
                 return dayCount(d1, d2)/365.0;
             }
+			BigInteger daysOfYear(){
+				return 365;
+			}
         };
     public:
         Actual365NoLeap()
