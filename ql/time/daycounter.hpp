@@ -52,6 +52,11 @@ namespace QuantLib {
                                         const Date& d2) const {
                 return (d2-d1);
             }
+
+			virtual	BigInteger daysOfYear() const{
+				return 365;	
+			};
+
             virtual Time yearFraction(const Date& d1,
                                       const Date& d2,
                                       const Date& refPeriodStart,
@@ -81,6 +86,7 @@ namespace QuantLib {
         //! Returns the number of days between two dates.
         BigInteger dayCount(const Date&,
                             const Date&) const;
+		BigInteger daysOfYear() ;
         //! Returns the period between two dates as a fraction of year.
         Time yearFraction(const Date&, const Date&,
                           const Date& refPeriodStart = Date(),
@@ -122,6 +128,11 @@ namespace QuantLib {
         QL_REQUIRE(impl_, "no implementation provided");
         return impl_->dayCount(d1,d2);
     }
+
+	inline	BigInteger DayCounter::daysOfYear() {
+		QL_REQUIRE(impl_, "no implementation provided");	
+		return impl_->daysOfYear();
+	};
 
     inline Time DayCounter::yearFraction(const Date& d1, const Date& d2,
         const Date& refPeriodStart, const Date& refPeriodEnd) const {

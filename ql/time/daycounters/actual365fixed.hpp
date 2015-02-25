@@ -52,6 +52,9 @@ namespace QuantLib {
                               const Date&) const {
                 return dayCount(d1,d2)/365.0;
             }
+			BigInteger daysOfYear(){
+				return 365;
+			}
         };
       public:
         Actual365Fixed()
